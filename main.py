@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 import requests
 
 app = Flask(__name__)
@@ -6,9 +6,17 @@ app = Flask(__name__)
 # Route to post a link and receive the result from the link checker app
 @app.route('/submit_link', methods=['POST'])
 def submit_link():
-    link = request.json.get('url')
+    # Read the URL from link.txt
+    try:
+        with open('link.txt', 'r') as file:
+            link = file.read().strip()
+    except FileNotFoundError:
+        return jsonify({"error": "link.txt file not found"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Error reading link.txt: {str(e)}"}), 500
+
     if not link:
-        return jsonify({"error": "No URL provided"}), 400
+        return jsonify({"error": "No URL found in link.txt"}), 400
 
     # Send the link to the main app's /check_link endpoint
     try:
